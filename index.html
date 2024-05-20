@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TouchDesigner Slider</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        .slider-container {
+            text-align: center;
+        }
+        input[type="range"] {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slider-container">
+        <h1>TouchDesigner Slider</h1>
+        <input type="range" id="slider" min="0" max="1" step="0.01" value="0">
+        <p id="value">Value: 0</p>
+    </div>
+    <script>
+        const slider = document.getElementById('slider');
+        const valueDisplay = document.getElementById('value');
+
+        // Update the value display
+        slider.addEventListener('input', () => {
+            const value = slider.value;
+            valueDisplay.textContent = `Value: ${value}`;
+            sendWebSocketMessage(value);
+        });
+
+        // WebSocket connection
+        const ws = new WebSocket('ws://192.168.128.132:12345'); // Replace with your TouchDesigner WebSocket server URL
+
+        ws.onopen = () => {
+            console.log('WebSocket connection opened');
+        };
+
+        ws.onmessage = (event) => {
+            console.log('Message from server:', event.data);
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket connection closed');
+        };
+
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        // Send the slider value via WebSocket
+        function sendWebSocketMessage(value) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(`/fader_shards ${value}`);
+            }
+        }
+    </script>
+</body>
+</html>
